@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>吃药么 · 在线演示 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1E9BFF; --blue-deep:#0A74F0; --blue-grad:linear-gradient(155deg,#3FB0FF,#0A74F0);
+  --green:#2FBF5B; --green-deep:#1FA24A; --green-soft:#E7F8EE;
+  --red:#FF4438; --red-deep:#E0342A; --red-soft:#FFECEA;
+  --ink:#15222F; --muted:#6A788B; --faint:#9AA7B6; --line:#E9EEF5;
+  --app:#FBFCFE; --card:#FFFFFF;
+  --shadow:0 14px 34px -16px rgba(18,42,82,.22); --shadow-sm:0 6px 16px -8px rgba(18,42,82,.18);
+  --r:26px; --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --disp:"Baloo 2","Noto Sans SC",system-ui,sans-serif;
+  --bh:40px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{font-family:var(--sans);color:var(--ink);background:var(--app);overflow:hidden;}
+#screen{position:absolute;top:var(--bh);right:0;bottom:78px;left:0;overflow-y:auto;padding:8px 22px 22px;}
+#screen::-webkit-scrollbar{width:0;}
+.hidden{display:none!important;}
+
+/* demo banner */
+#demo-banner{position:fixed;top:0;left:0;right:0;height:var(--bh);z-index:200;
+  background:linear-gradient(90deg,#C42519,#E0342A);color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:13px;font-weight:800;padding:0 12px;}
+#demo-banner a{color:#FFD0CC;font-size:12px;font-weight:700;text-decoration:underline;white-space:nowrap;}
+
+.ah{display:flex;align-items:flex-end;justify-content:space-between;margin:10px 0 18px;}
+.ah .date{color:var(--muted);font-weight:600;font-size:14px;}
+.ah .hi{font-size:27px;font-weight:900;margin-top:2px;}
+.ah .ava{width:46px;height:46px;border-radius:50%;background:var(--blue-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;box-shadow:var(--shadow-sm);}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm);}
+.hero{position:relative;overflow:hidden;border:0;color:#fff;background:var(--blue-grad);box-shadow:0 20px 40px -18px rgba(10,116,240,.7);}
+.hero::after{content:"";position:absolute;right:-40px;top:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.16);}
+.hero .lab{font-weight:700;font-size:14px;opacity:.92;}
+.hero .time{font-family:var(--disp);font-weight:800;font-size:50px;line-height:1;margin:6px 0 2px;}
+.hero .sub{font-weight:600;font-size:15px;opacity:.95;}
+.hero .pillline{display:flex;align-items:center;gap:10px;margin-top:14px;background:rgba(255,255,255,.18);padding:10px 14px;border-radius:16px;}
+.hero .pillline b{font-size:17px;}
+
+.sectlab{font-weight:800;font-size:15px;margin:22px 4px 12px;display:flex;align-items:center;justify-content:space-between;}
+.sectlab span{color:var(--faint);font-weight:600;font-size:12.5px;}
+
+.row{display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 15px;margin-bottom:12px;box-shadow:var(--shadow-sm);}
+.row .t{font-family:var(--disp);font-weight:700;font-size:18px;width:54px;flex:0 0 auto;}
+.row .ic{width:44px;height:44px;border-radius:14px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:#EAF3FF;}
+.row .mid{flex:1;min-width:0;}
+.row .mid .n{font-weight:800;font-size:16px;}
+.row .mid .d{color:var(--muted);font-size:13px;font-weight:500;margin-top:2px;}
+.tag{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;display:inline-block;}
+.tag.after{background:#FFF3DE;color:#C77C12;} .tag.before{background:#E7F1FF;color:#1366C9;} .tag.skin{background:#EAE7FF;color:#5B43C9;}
+.st{width:34px;height:34px;border-radius:50%;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-weight:900;border:0;cursor:pointer;font-size:16px;}
+.st.done{background:var(--green);color:#fff;} .st.miss{background:var(--red);color:#fff;}
+.st.wait{background:#EDF1F6;color:var(--faint);border:2px dashed #CDD6E2;}
+.row.is-done{background:var(--green-soft);border-color:#CDEFD9;} .row.is-miss{background:var(--red-soft);border-color:#FBD3CF;}
+
+.primary{width:100%;border:0;cursor:pointer;margin-top:18px;background:var(--blue-grad);color:#fff;font-family:var(--sans);font-weight:900;font-size:20px;border-radius:22px;padding:19px;box-shadow:0 18px 34px -16px rgba(10,116,240,.75);}
+.primary:active{transform:scale(.98);} .primary.green{background:linear-gradient(160deg,#46D277,var(--green-deep));}
+.primary:disabled{opacity:.5;}
+
+.drop{border:2.5px dashed #BFD4EE;border-radius:26px;background:linear-gradient(180deg,#F5FAFF,#fff);padding:30px 18px;text-align:center;cursor:pointer;}
+.drop .cam{width:74px;height:74px;border-radius:24px;margin:0 auto 12px;background:var(--blue-grad);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);}
+.drop .big{font-weight:900;font-size:19px;} .drop .sm{color:var(--muted);font-size:13.5px;margin-top:4px;}
+.midrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 4px;border-bottom:1px solid var(--line);}
+.midrow:last-child{border-bottom:0;}
+.midrow .n{font-weight:800;font-size:16px;} .midrow .d{color:var(--muted);font-size:13px;margin-top:2px;}
+.midrow .when{font-weight:800;font-size:13px;color:var(--blue-deep);text-align:right;white-space:nowrap;}
+.del{border:0;background:#FFECEA;color:var(--red-deep);font-weight:800;border-radius:12px;padding:8px 12px;cursor:pointer;font-size:13px;}
+
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid var(--line);}
+.setrow:last-child{border-bottom:0;}
+.setrow .l b{font-weight:800;font-size:16px;}
+.setrow input[type=time]{font-family:var(--disp);font-weight:700;font-size:20px;color:var(--blue-deep);border:1.5px solid var(--line);border-radius:12px;padding:6px 10px;background:#fff;}
+.hint{display:flex;gap:9px;align-items:flex-start;background:#FFF7E8;border:1px solid #FCE9C2;color:#A9710F;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:600;line-height:1.5;margin-top:14px;}
+.field{margin-top:12px;} .field label{font-weight:700;font-size:13px;color:var(--muted);margin-left:4px;}
+.inp{width:100%;margin-top:6px;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:14px 16px;font-weight:700;font-size:16px;color:var(--ink);font-family:var(--sans);}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.chip{border:1.5px solid var(--line);border-radius:14px;padding:10px 14px;font-weight:800;font-size:13.5px;color:var(--muted);cursor:pointer;user-select:none;}
+.chip.on{background:var(--blue-grad);color:#fff;border-color:transparent;box-shadow:var(--shadow-sm);}
+
+.kpi{display:flex;gap:14px;margin-bottom:16px;}
+.kpi .b{flex:1;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow-sm);text-align:center;}
+.kpi .b .num{font-family:var(--disp);font-weight:800;font-size:32px;line-height:1;}
+.kpi .b.main .num{color:var(--green-deep);} .kpi .b .lab{color:var(--muted);font-size:12.5px;font-weight:600;margin-top:6px;}
+table.grid{width:100%;border-collapse:separate;border-spacing:7px;}
+table.grid th{font-size:12px;color:var(--muted);font-weight:700;}
+table.grid .day{font-weight:800;font-size:13.5px;text-align:left;width:42px;}
+.cell{width:34px;height:34px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;}
+.cell.y{background:var(--green);color:#fff;} .cell.n{background:var(--red);color:#fff;} .cell.x{background:#EDF1F6;color:#C2CCD8;}
+.repnote{display:flex;gap:18px;justify-content:center;margin-top:14px;color:var(--muted);font-size:12.5px;font-weight:600;}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:6px;}
+
+.vseg{display:flex;gap:6px;background:#EDF1F6;border-radius:16px;padding:5px;margin:0 0 16px;}
+.vseg button{flex:1;border:0;background:none;border-radius:12px;padding:10px;font-family:var(--sans);font-weight:800;font-size:15px;color:var(--muted);cursor:pointer;}
+.vseg button.on{background:#fff;color:var(--blue-deep);box-shadow:var(--shadow-sm);}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px;font-size:18px;font-weight:900;}
+.navb{border:0;background:#EDF1F6;color:var(--blue-deep);width:38px;height:38px;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cw{text-align:center;color:var(--faint);font-weight:700;font-size:12.5px;padding-bottom:4px;}
+.cd{position:relative;aspect-ratio:1/1;border-radius:14px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;cursor:pointer;}
+.cd.empty{background:none;border:0;cursor:default;}
+.cd.has{background:var(--green-soft);border-color:#CDEFD9;color:var(--green-deep);}
+.cd.today{outline:2.5px solid var(--blue);outline-offset:-1px;}
+.cd .md{position:absolute;bottom:6px;width:7px;height:7px;border-radius:50%;background:var(--green);}
+.callegend{display:flex;gap:18px;justify-content:center;margin-top:14px;color:var(--muted);font-size:12.5px;font-weight:600;}
+.callegend i{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:6px;}
+.callegend i.md{background:var(--green);} .callegend i.td{background:none;border:2px solid var(--blue);}
+
+.guide .gline{padding:11px 2px;border-bottom:1px solid var(--line);}
+.guide .gline:last-child{border-bottom:0;}
+.guide .gline b{display:block;font-size:13px;color:var(--blue-deep);font-weight:800;margin-bottom:3px;}
+.guide .gline span{font-size:14.5px;font-weight:600;line-height:1.55;color:var(--ink);}
+.guide .gline.warn b{color:var(--red-deep);} .guide .gline.warn span{color:#9a2b22;}
+.planbig{font-weight:800;font-size:17px;color:var(--green-deep);}
+.notfound{font-weight:700;font-size:15px;line-height:1.6;color:var(--ink);}
+.disclaimer{background:var(--red-soft);border:1.5px solid #FBD3CF;color:#9a2b22;border-radius:16px;
+  padding:13px 15px;font-size:13.5px;font-weight:700;line-height:1.55;margin:16px 0 12px;}
+.verifybox{display:flex;flex-direction:column;gap:12px;}
+.bigverify{width:100%;border:0;cursor:pointer;border-radius:20px;padding:18px;font-family:var(--sans);
+  font-weight:900;font-size:18px;color:#fff;text-align:left;box-shadow:var(--shadow-sm);}
+.bigverify small{display:block;font-size:12.5px;font-weight:600;opacity:.92;margin-top:4px;}
+.bigverify.cn{background:var(--blue-grad);} .bigverify.tp{background:linear-gradient(155deg,#7C8AA5,#566480);}
+.bigverify:active{transform:scale(.98);}
+
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:78px;background:rgba(255,255,255,.96);border-top:1px solid var(--line);display:flex;backdrop-filter:blur(8px);}
+.tabbar button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--faint);font-size:11.5px;font-weight:700;cursor:pointer;font-family:var(--sans);}
+.tabbar button.on{color:var(--blue-deep);} .tabbar button svg{width:24px;height:24px;}
+
+#alarm{position:absolute;top:var(--bh);right:0;bottom:0;left:0;z-index:50;background:linear-gradient(180deg,#F3F8FF,#FBFCFE);display:flex;flex-direction:column;padding:18px 24px 26px;}
+#alarm .rt{font-family:var(--disp);font-weight:800;font-size:62px;text-align:center;line-height:1;background:var(--blue-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+#alarm .rk{text-align:center;font-weight:900;font-size:23px;margin-top:6px;}
+#alarm .rk small{display:block;color:var(--muted);font-weight:600;font-size:15px;margin-top:4px;}
+.medbig{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:30px;padding:22px;text-align:center;box-shadow:var(--shadow);}
+.medbig .cap2{width:92px;height:92px;border-radius:26px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:var(--blue-grad);box-shadow:0 16px 30px -14px rgba(10,116,240,.7);}
+.medbig .name{font-size:29px;font-weight:900;} .medbig .dose{margin-top:6px;font-size:19px;font-weight:700;color:var(--blue-deep);}
+.medbig .note{margin-top:14px;color:var(--muted);font-size:15px;font-weight:600;background:#F4F7FC;border-radius:14px;padding:10px 14px;}
+.bigbtns{display:flex;gap:16px;margin-top:auto;}
+.bbtn{flex:1;border:0;cursor:pointer;border-radius:26px;padding:24px 10px;color:#fff;font-weight:900;font-size:24px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:var(--shadow);font-family:var(--sans);}
+.bbtn:active{transform:scale(.96);} .bbtn .gly{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;}
+.bbtn.green{background:linear-gradient(160deg,#46D277,var(--green-deep));} .bbtn.red{background:linear-gradient(160deg,#FF6359,var(--red-deep));}
+.bbtn small{font-size:13px;font-weight:600;opacity:.9;}
+.later{text-align:center;margin-top:14px;color:var(--faint);font-weight:700;font-size:15px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+#loading{position:absolute;inset:var(--bh) 0 0 0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;}
+</style>
+</head>
+<body>
+
+<div id="demo-banner">
+  🎭 DEMO 演示 · 模拟数据，不会真正保存或发出提醒
+  <a href="https://github.com/SteveBohanMa/chiyaome/releases/latest" target="_blank">↓ 下载正式版</a>
+</div>
+
+<div id="loading">加载中…</div>
+<div id="screen" class="hidden"></div>
+
+<div class="tabbar hidden" id="tabbar">
+  <button data-tab="today" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg><span class="tl" data-tl="tab_today">今日</span></button>
+  <button data-tab="photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.5"/></svg><span class="tl" data-tl="tab_photo">拍照</span></button>
+  <button data-tab="custom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span class="tl" data-tl="tab_custom">自定义</span></button>
+  <button data-tab="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 4v16M4 9h16"/></svg><span class="tl" data-tl="tab_week">周报</span></button>
+</div>
+
+<div id="alarm" class="hidden"></div>
+
+<script>
+/* =====================================================
+   DEMO 演示模式 · JS Mock Backend
+   所有 API 调用返回模拟数据，无需 Python 后端
+   ===================================================== */
+(function setupMockBackend() {
+  const _delay = ms => new Promise(r => setTimeout(r, ms));
+  const _clone = x => JSON.parse(JSON.stringify(x));
+
+  function addMin(t, n) {
+    const [h, m] = t.split(":").map(Number);
+    const tot = h * 60 + m + n;
+    return String(Math.floor(tot / 60) % 24).padStart(2,"0") + ":" + String(tot % 60).padStart(2,"0");
+  }
+
+  const _settings = {
+    user_name: "王奶奶", lang: "zh",
+    sound_on: true, voice_on: true, autostart: true, use_online: false, api_key: "",
+    after_meal_delay: 30,
+    times: { wake: "07:00", breakfast: "07:30", lunch: "12:00", dinner: "18:00", bedtime: "21:30" },
+    family_note: "降压药每天必须按时服用，血压高时务必告知子女"
+  };
+
+  const _meds = [
+    { id:"m1", name:"硝苯地平控释片", dose:"30mg（1片）", type:"pill",
+      timings:["after_breakfast"], start_date:"2025-01-01", end_date:null, course_text:"长期", note:"降压药" },
+    { id:"m2", name:"阿司匹林肠溶片", dose:"100mg（1片）", type:"pill",
+      timings:["after_breakfast"], start_date:"2025-01-01", end_date:null, course_text:"长期", note:"防血栓，整片吞服勿嚼" },
+    { id:"m3", name:"二甲双胍片", dose:"500mg（1片）", type:"pill",
+      timings:["after_breakfast","after_dinner"], start_date:"2025-01-01", end_date:null, course_text:"长期", note:"降血糖，随餐服" },
+    { id:"m4", name:"钙尔奇D", dose:"1片", type:"pill",
+      timings:["after_lunch"], start_date:"2025-01-01", end_date:null, course_text:"长期", note:"补钙" },
+    { id:"m5", name:"润肤软膏", dose:"适量", type:"skin",
+      timings:["bedtime"], start_date:"2025-01-01", end_date:null, course_text:"长期", note:"睡前薄涂手背" }
+  ];
+
+  function timingToTime(timing, s) {
+    const d = s.after_meal_delay || 30;
+    return {
+      before_breakfast: s.times.wake,
+      after_breakfast:  addMin(s.times.breakfast, d),
+      before_lunch:     s.times.lunch,
+      after_lunch:      addMin(s.times.lunch, d),
+      before_dinner:    s.times.dinner,
+      after_dinner:     addMin(s.times.dinner, d),
+      bedtime:          s.times.bedtime,
+      custom:           "09:00"
+    }[timing] || "09:00";
+  }
+
+  function genToday(meds, settings) {
+    const today = new Date().toISOString().slice(0,10);
+    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const evts = [];
+    for (const m of meds) {
+      for (const timing of m.timings) {
+        const time = timingToTime(timing, settings);
+        const [eh, em] = time.split(":").map(Number);
+        const status = (eh * 60 + em + 90 <= nowMin) ? "done" : "wait";
+        evts.push({ key: `${today}_${m.id}_${timing}`, time, name: m.name, dose: m.dose,
+                    type: m.type, timing, status, note: m.note || "" });
+      }
+    }
+    return evts.sort((a,b) => a.time.localeCompare(b.time));
+  }
+
+  const _week = {
+    rate: 87, done: 26, missed: 4,
+    columns: ["早饭后","午饭后","晚饭后","睡前"],
+    rows: [
+      {day:"周一", cells:["y","y","y","y"]},
+      {day:"周二", cells:["y","n","y","y"]},
+      {day:"周三", cells:["y","y","n","y"]},
+      {day:"周四", cells:["y","y","y","y"]},
+      {day:"周五", cells:["y","y","y","n"]},
+      {day:"周六", cells:["n","y","y","y"]},
+      {day:"周日", cells:["y","x","y","y"]}
+    ]
+  };
+
+  const _s = {
+    settings: _settings,
+    meds: _meds,
+    today: genToday(_meds, _settings),
+    week: _week
+  };
+
+  const MOCK = {
+    async get_state() { return _clone(_s); },
+
+    async mark(key, status) {
+      const ev = _s.today.find(e => e.key === key);
+      if (ev) ev.status = status;
+      return _clone(_s);
+    },
+
+    async snooze() {},
+
+    async pick_and_parse() {
+      await _delay(1800);
+      return {
+        ok: true, offline: true,
+        meds: [
+          { name:"氨氯地平片",      dose:"5mg",  type:"pill", timings:["after_breakfast"], note:"" },
+          { name:"瑞舒伐他汀钙片",  dose:"10mg", type:"pill", timings:["bedtime"],         note:"" }
+        ]
+      };
+    },
+
+    async confirm_parsed(meds) {
+      for (const m of meds) {
+        _s.meds.push({ id:"m"+Date.now()+Math.random().toString(36).slice(2),
+          name:m.name, dose:m.dose, type:m.type, timings:m.timings, note:m.note||"",
+          start_date:new Date().toISOString().slice(0,10), end_date:null, course_text:"长期" });
+      }
+      _s.today = genToday(_s.meds, _s.settings);
+      return _clone(_s);
+    },
+
+    async pick_and_parse_box() {
+      await _delay(2000);
+      return {
+        ok: true, found: true,
+        raw_name: "硝苯地平控释片",
+        approval_no: "国药准字H10950267",
+        drug: {
+          name_cn: "硝苯地平控释片", source: "seed_cn",
+          indications: "用于治疗高血压、稳定型心绞痛。",
+          usage: "口服，每日一次，每次一片（30mg），整片吞服，勿嚼碎。",
+          contraindication: "对硝苯地平或任何辅料过敏者禁用；心源性休克患者禁用。",
+          cautions: "可能引起头痛、面红、踝部水肿；勿与葡萄柚汁同服。",
+          elderly_caution: "老年人对低血压敏感性增加，起始剂量宜小，起床时动作宜缓慢，防止体位性低血压。"
+        },
+        suggest: { name:"硝苯地平控释片", dose:"30mg（1片）", type:"pill", timings:["after_breakfast"] }
+      };
+    },
+
+    async add_med(med) {
+      _s.meds.push({ ...med, id:"m"+Date.now(), end_date:null });
+      _s.today = genToday(_s.meds, _s.settings);
+      return _clone(_s);
+    },
+
+    async delete_med(id) {
+      _s.meds = _s.meds.filter(m => m.id !== id);
+      _s.today = genToday(_s.meds, _s.settings);
+      return _clone(_s);
+    },
+
+    async update_settings(patch) {
+      if (patch.times) { Object.assign(_s.settings.times, patch.times); }
+      else { const {times, ...rest} = patch; Object.assign(_s.settings, rest); }
+      _s.today = genToday(_s.meds, _s.settings);
+      return _clone(_s);
+    },
+
+    async test_alarm() {
+      window.showAlarmFromPython && window.showAlarmFromPython({
+        key: "_test_demo",
+        time: new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit",hour12:false}),
+        name: "硝苯地平控释片", dose: "30mg（1片）", type: "pill",
+        timing: "after_breakfast", note: "演示提醒 · 点「已吃」或「没吃」体验效果"
+      });
+    },
+
+    async stop_alarm() {},
+
+    async export_week() {
+      return { ok:true, path:"演示模式：需安装正式 exe 才能导出实际文件" };
+    },
+
+    async med_days(ym) {
+      const [y,m] = ym.split("-").map(Number);
+      const today = new Date(), days = [];
+      for (let d = 1; d <= new Date(y,m,0).getDate(); d++) {
+        if (new Date(y,m-1,d) > today) break;
+        if (d % 7 !== 3) days.push(`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+      }
+      return days;
+    },
+
+    async get_day(iso) {
+      return { events: [
+        {key:`${iso}_d1`, time:"08:00", name:"硝苯地平控释片", dose:"30mg（1片）", type:"pill", timing:"after_breakfast", status:"done", note:""},
+        {key:`${iso}_d2`, time:"12:30", name:"钙尔奇D",        dose:"1片",          type:"pill", timing:"after_lunch",      status:"done", note:""},
+        {key:`${iso}_d3`, time:"18:30", name:"二甲双胍片",     dose:"500mg（1片）", type:"pill", timing:"after_dinner",     status:"done", note:""}
+      ]};
+    },
+
+    async open_verify_url(which, name) {
+      const urls = {
+        nmpa:   `https://www.nmpa.gov.cn/datasearch/search-info.html`,
+        mozun:  `https://www.mzdata.com.cn/`,
+        drugscom:`https://www.drugs.com/search.php?searchterm=${encodeURIComponent(name)}`
+      };
+      try { await navigator.clipboard.writeText(name); } catch(e) {}
+      window.open(urls[which] || urls.nmpa, "_blank");
+      return {ok:true};
+    },
+
+    async drugdb_count() { return 74; },
+    async add_drug_entry(entry) { return {ok:true, msg:`「${entry.name}」已添加（演示模式，刷新后不保留）`}; },
+    async import_drugs_json()   { return {ok:true, msg:"演示模式：已模拟导入 3 种药品（刷新后不保留）"}; }
+  };
+
+  window.pywebview = { api: MOCK };
+})();
+/* =====================================================
+   END MOCK — 以下为应用主逻辑（与 index.html 一致）
+   ===================================================== */
+
+let STATE=null, TAB="today", ALARM_KEY=null;
+let TODAY_VIEW="day", CAL_YM=null;
+const I18N={
+ zh:{v_today:"今日",v_month:"月历",tab_today:"今日",tab_photo:"拍照",tab_custom:"自定义",tab_week:"周报",sound_sub:"到点响铃，最小化也会弹出",voice_sub:"念出该吃哪种药",autostart_sub:"开机后自动在后台提醒；关闭窗口会缩到右下角托盘，不会退出",lang_label:"显示与语音语言",hello:"您好，",me:"我",calload:"加载中…",
+   next_dose:"下一次用药",today_word:"今天",all_done:"全部完成",all_arranged:"今天的用药都安排好啦",
+   no_meds:"还没有添加药品。去「拍照」识别药单，或在「自定义」里添加。",today_plan:"今日安排",done_label:"已完成",
+   cal_no_plan:"这一天没有用药安排。",legend_has:"有用药安排",legend_today:"今天",
+   presc_tab:"拍医嘱单",box_tab:"拍药盒",box_mode:"药盒模式",box_title:"拍药盒识别",
+   box_cta:"点这里模拟扫描药盒（演示：无需真实照片）",box_sub:"本地查询用药指南 · 无需联网",
+   presc_mode:"医嘱模式",presc_title:"拍照识别医嘱",presc_cta:"点这里模拟识别医嘱（演示：自动返回示例结果）",presc_sub:"本地离线识别 · 无需联网",
+   recognizing2:"正在识别，请稍候…",cancelled:"已取消",parsed_pre:"已识别",parsed_kinds:"种",offline:"离线",parsed_post:"请核对后生成",
+   parse_hint:"离线识别为自动推测，请帮长辈核对药名与时间，有误可在「自定义」里修改。",confirm_add:"确认，加入提醒",
+   custom_mode:"自定义模式 · 方便子女代设置",custom_title:"作息与用药",sec_profile:"档案",
+   lbl_username:"老人称呼（显示在首页）",ph_username:"例如：王奶奶",lbl_note:"给家属的备注（仅本机显示，不外发）",
+   ph_note:"例如：降压药每天必须吃，过敏史…",save_profile:"保存档案",sec_times:"每日作息时间",times_hint:"点时间可修改",
+   t_wake:"起床",t_breakfast:"早饭",t_lunch:"午饭",t_dinner:"晚饭",t_bedtime:"睡前",
+   meal_delay_pre:"「饭后服用」的药，会在对应饭点",meal_delay_post:"分钟后自动提醒。",
+   sec_added:"已添加的用药",no_added:"暂无药品",del:"删除",course_until:"至 ",course_long:"长期",
+   sec_addmed:"添加一种用药 / 行为",lbl_name:"名称",ph_name:"例如：二甲双胍片 / 涂药膏",
+   lbl_dose:"用量",ph_dose:"例如：1 片 / 适量涂抹患处",lbl_type:"类型",type_pill:"口服药",type_skin:"外用/涂药",
+   lbl_timing:"时机（可多选）",lbl_start:"开始日期",lbl_course:"疗程",
+   c_long:"长期",c_3d:"3天",c_1w:"1周",c_2w:"两周",c_1m:"1个月",add_to_remind:"＋ 添加到提醒",
+   sec_remind:"提醒方式",opt_sound:"声音提醒",opt_voice:"语音播报",on_word:"开",off_word:"关",test_alarm:"测试提醒（演示：点击触发弹窗）",
+   sec_run:"运行",opt_autostart:"开机自动运行",sec_db:"用药资料库",
+   db_hint:"这是离线药品资料库（已含常见老年用药 + openFDA）。可在这里继续添加新药，拍药盒时就能查到。",
+   lbl_drugname:"药品名称",ph_drugname:"例如：复方丹参滴丸",lbl_desc:"说明 / 用途",ph_desc:"例如：活血化瘀，用于冠心病",
+   lbl_usage:"用法",ph_usage:"例如：每日三次，餐后",lbl_cat:"类别（可选）",ph_cat:"例如：中成药 / 降压",
+   add_to_db:"＋ 添加到资料库",import_json:"从 JSON 文件批量导入",
+   json_hint:'JSON 格式：[{"name":"药名","desc":"用途","usage":"每日两次，随餐","category":"降压"}]；也可直接导入 openfda_slim.json。',
+   sec_online:"联网识别（可选）",online_hint:"默认离线识别即可，无需联网。若想更高准确度，可开启联网并填入 Key。",
+   opt_online:"使用联网识别",save_key:"保存 Key",db_total_pre:"共 ",db_total_post:" 种",
+   week_this:"本周",week_title:"本周用药报告",kpi_rate:"按时服药率",kpi_done:"已服用",kpi_missed:"漏服",
+   legend_took:"吃了",legend_nottook:"没吃",legend_none:"无安排",export_week:"导出表单 · 发送给子女",exported_to:"已导出到：",
+   alarm_pill:"该吃药了",alarm_skin:"该涂药了",eat:"吃 ",note_pre:"提示：",done_pill:"已吃",done_skin:"已涂",tap_this:"点这个",
+   skip_pill:"没吃",skip_skin:"没涂",remind_later:"稍后提醒",later_line:"晚点再说 · 10 分钟后再提醒",
+   alert_need_name:"请填写药品名称",alert_need_name2:"请填写名称",alert_need_timing:"请选择至少一个时机",
+   alert_saved:"已保存",alert_done:"完成",copied_name:"已复制药名，请在打开的网页中粘贴搜索",gate_confirm2:"确认无误，加入提醒"},
+ en:{v_today:"Today",v_month:"Calendar",tab_today:"Today",tab_photo:"Photo",tab_custom:"Settings",tab_week:"Report",sound_sub:"Rings on time; pops up even when minimized",voice_sub:"Announces which medicine to take",autostart_sub:"Runs in background at startup; closing the window minimizes to the tray, it does not quit",lang_label:"Display & voice language",hello:"Hello, ",me:"Me",calload:"Loading…",
+   next_dose:"Next dose",today_word:"Today",all_done:"All done",all_arranged:"All set for today",
+   no_meds:'No medicines yet. Use "Photo" to scan a prescription, or add under "Settings".',today_plan:"Today's plan",done_label:"Done",
+   cal_no_plan:"No medicines scheduled for this day.",legend_has:"Has meds",legend_today:"Today",
+   presc_tab:"Prescription",box_tab:"Medicine box",box_mode:"Box mode",box_title:"Scan a medicine box",
+   box_cta:"Tap to simulate box scan (demo: no real photo needed)",box_sub:"Local lookup · no internet needed",
+   presc_mode:"Prescription mode",presc_title:"Scan a prescription",presc_cta:"Tap to simulate OCR (demo: returns example result)",presc_sub:"Offline recognition · no internet needed",
+   recognizing2:"Recognizing, please wait…",cancelled:"Cancelled",parsed_pre:"Recognized",parsed_kinds:"item(s)",offline:"Offline",parsed_post:"please review then add",
+   parse_hint:'Offline recognition is an automatic guess. Please check the names and times; you can edit them under "Settings".',confirm_add:"Confirm and add",
+   custom_mode:"Settings · easy for family to set up",custom_title:"Schedule & medicines",sec_profile:"Profile",
+   lbl_username:"Display name (shown on home)",ph_username:"e.g., Grandma Wang",lbl_note:"Note for family (stored locally only)",
+   ph_note:"e.g., BP meds every day; allergies…",save_profile:"Save profile",sec_times:"Daily routine",times_hint:"tap a time to edit",
+   t_wake:"Wake",t_breakfast:"Breakfast",t_lunch:"Lunch",t_dinner:"Dinner",t_bedtime:"Bedtime",
+   meal_delay_pre:"After-meal medicines are reminded",meal_delay_post:"minutes after the meal.",
+   sec_added:"Added medicines",no_added:"No medicines yet",del:"Delete",course_until:"until ",course_long:"Ongoing",
+   sec_addmed:"Add a medicine / action",lbl_name:"Name",ph_name:"e.g., Metformin tablet / ointment",
+   lbl_dose:"Dose",ph_dose:"e.g., 1 tablet / apply as needed",lbl_type:"Type",type_pill:"Oral",type_skin:"Topical",
+   lbl_timing:"When (multi-select)",lbl_start:"Start date",lbl_course:"Course",
+   c_long:"Ongoing",c_3d:"3 days",c_1w:"1 week",c_2w:"2 weeks",c_1m:"1 month",add_to_remind:"＋ Add reminder",
+   sec_remind:"Reminders",opt_sound:"Sound alert",opt_voice:"Voice announcement",on_word:"On",off_word:"Off",test_alarm:"Test reminder (demo: triggers alarm overlay)",
+   sec_run:"Startup",opt_autostart:"Run at startup",sec_db:"Medicine database",
+   db_hint:"Offline medicine database (common elderly meds + openFDA). Add new medicines here so box scanning can find them.",
+   lbl_drugname:"Medicine name",ph_drugname:"e.g., Compound Danshen pills",lbl_desc:"Description / use",ph_desc:"e.g., for coronary heart disease",
+   lbl_usage:"Usage",ph_usage:"e.g., three times daily, after meals",lbl_cat:"Category (optional)",ph_cat:"e.g., TCM / antihypertensive",
+   add_to_db:"＋ Add to database",import_json:"Bulk import from a JSON file",
+   json_hint:'JSON format: [{"name":"...","desc":"...","usage":"...","category":"..."}]; openfda_slim.json also works.',
+   sec_online:"Online recognition (optional)",online_hint:"Offline works by default. For higher accuracy, enable online and enter a Key.",
+   opt_online:"Use online recognition",save_key:"Save Key",db_total_pre:"",db_total_post:" total",
+   week_this:"This week",week_title:"Weekly report",kpi_rate:"On-time rate",kpi_done:"Taken",kpi_missed:"Missed",
+   legend_took:"Taken",legend_nottook:"Missed",legend_none:"None",export_week:"Export · send to family",exported_to:"Exported to:",
+   alarm_pill:"Time to take medicine",alarm_skin:"Time to apply medicine",eat:"Take ",note_pre:"Note: ",done_pill:"Taken",done_skin:"Applied",tap_this:"tap here",
+   skip_pill:"Not taken",skip_skin:"Not applied",remind_later:"remind later",later_line:"Later · remind in 10 min",
+   alert_need_name:"Please enter a medicine name",alert_need_name2:"Please enter a name",alert_need_timing:"Please choose at least one time",
+   alert_saved:"Saved",alert_done:"Done",copied_name:"Drug name copied; paste it to search on the opened page",gate_confirm2:"Confirm and add"}
+};
+function t(k){const L=(STATE.settings&&STATE.settings.lang)||"zh";return (I18N[L]&&I18N[L][k])||I18N.zh[k]||k;}
+const _WCOL={"早":"Morn","午":"Noon","晚":"Eve","睡前":"Bed"};
+const _WDAY={"周一":"Mon","周二":"Tue","周三":"Wed","周四":"Thu","周五":"Fri","周六":"Sat","周日":"Sun"};
+function wcol(c){return (((STATE.settings&&STATE.settings.lang)||"zh")==="en")?(_WCOL[c]||c):c;}
+function wday(x){return (((STATE.settings&&STATE.settings.lang)||"zh")==="en")?(_WDAY[x]||x):x;}
+function todayLocalISO(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function dateLabel(iso){const L=(STATE.settings&&STATE.settings.lang)||"zh";const d=new Date(iso+"T00:00");
+  if(L==="en") return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+  return (d.getMonth()+1)+"月"+d.getDate()+"日 星期"+"日一二三四五六"[d.getDay()];}
+const $=s=>document.querySelector(s);
+const esc=t=>(""+t).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const api=()=>window.pywebview.api;
+
+const pillSVG='<svg width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="9.5" width="18" height="5" rx="2.5" fill="#1E9BFF"/></svg>';
+const skinSVG='<svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#5B43C9" stroke-width="2.4"/></svg>';
+
+async function refresh(){ STATE=await api().get_state(); render(); }
+
+function renderTabs(){document.querySelectorAll(".tabbar .tl").forEach(e=>{e.textContent=t(e.dataset.tl);});}
+function render(){
+  renderTabs();
+  $("#loading").classList.add("hidden");
+  $("#screen").classList.remove("hidden");
+  $("#tabbar").classList.remove("hidden");
+  if(TAB==="today")  renderToday();
+  if(TAB==="photo")  renderPhoto();
+  if(TAB==="custom") renderCustom();
+  if(TAB==="week")   renderWeek();
+}
+
+function nextEvent(){ return (STATE.today||[]).find(e=>e.status==="wait") || null; }
+
+function renderToday(){
+  const s=STATE.settings, evs=STATE.today||[], nx=nextEvent();
+  const doneN=evs.filter(e=>e.status==="done").length;
+  const seg=`<div class="vseg">
+      <button class="${TODAY_VIEW==='day'?'on':''}" onclick="setTodayView('day')">${t('v_today')}</button>
+      <button class="${TODAY_VIEW==='month'?'on':''}" onclick="setTodayView('month')">${t('v_month')}</button></div>`;
+  const head=`<div class="ah"><div><div class="date">${esc(dateLabel(todayLocalISO()))}</div>
+      <div class="hi">${t('hello')}${esc(s.user_name||"")}</div></div>
+      <div class="ava">${esc((s.user_name||t('me')).slice(0,1))}</div></div>${seg}`;
+  if(TODAY_VIEW==="month"){ $("#screen").innerHTML=head+`<div id="calwrap">${t('calload')}</div>`; renderMonth(); return; }
+  let hero;
+  if(nx){
+    hero=`<div class="card hero"><div class="lab">${t('next_dose')}</div>
+      <div class="time">${nx.time}</div><div class="sub">${esc(tlabel(nx.timing))}</div>
+      <div class="pillline">${nx.type==="skin"?skinSVG:pillSVG}<b>${esc(nx.name)} · ${esc(nx.dose)}</b></div></div>`;
+  }else{
+    hero=`<div class="card hero"><div class="lab">${t('today_word')}</div><div class="time">${t('all_done')}</div>
+      <div class="sub">${t('all_arranged')}</div></div>`;
+  }
+  const rows=evs.map(e=>{
+    const cls=e.status==="done"?"is-done":e.status==="skip"?"is-miss":"";
+    const st=e.status==="done"?'<div class="st done">✓</div>'
+            :e.status==="skip"?`<button class="st miss" onclick="mark('${e.key}','done')">✕</button>`
+            :`<button class="st wait" onclick="mark('${e.key}','done')">·</button>`;
+    const tagcls=e.timing.startsWith("before")?"before":e.type==="skin"?"skin":"after";
+    return `<div class="row ${cls}"><div class="t">${e.time}</div>
+      <div class="ic">${e.type==="skin"?skinSVG:pillSVG}</div>
+      <div class="mid"><div class="n">${esc(e.name)} · ${esc(e.dose)}</div>
+      <div class="d"><span class="tag ${tagcls}">${esc(tlabel(e.timing))}</span></div></div>${st}</div>`;
+  }).join("") || `<div class="hint">${t('no_meds')}</div>`;
+  $("#screen").innerHTML=head+`
+    ${hero}
+    <div class="sectlab">${t('today_plan')} <span>${t('done_label')} ${doneN} / ${evs.length}</span></div>
+    ${rows}`;
+}
+function setTodayView(v){ TODAY_VIEW=v; if(v==="month"&&!CAL_YM){ const t=new Date(); CAL_YM=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0"); } render(); }
+function shiftMonth(delta){
+  let [y,m]=CAL_YM.split("-").map(Number); m+=delta;
+  if(m<1){m=12;y--;} if(m>12){m=1;y++;}
+  CAL_YM=y+"-"+String(m).padStart(2,"0"); renderMonth();
+}
+async function renderMonth(){
+  const [y,m]=CAL_YM.split("-").map(Number);
+  let days=[]; try{ days=await api().med_days(CAL_YM); }catch(e){}
+  const has=new Set(days);
+  const first=new Date(y,m-1,1), startW=(first.getDay()+6)%7;
+  const dim=new Date(y,m,0).getDate();
+  const todayISO=new Date().toISOString().slice(0,10);
+  let cells="";
+  for(let i=0;i<startW;i++) cells+=`<div class="cd empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const iso=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const klass=["cd",has.has(iso)?"has":"",iso===todayISO?"today":""].join(" ").trim();
+    cells+=`<div class="${klass}" onclick="pickDay('${iso}')"><span>${d}</span>${has.has(iso)?'<i class="md"></i>':""}</div>`;
+  }
+  const wk=(((STATE.settings&&STATE.settings.lang)||"zh")==="en"?["M","T","W","T","F","S","S"]:["一","二","三","四","五","六","日"]).map(w=>`<div class="cw">${w}</div>`).join("");
+  document.getElementById("calwrap").innerHTML=`
+    <div class="calhead">
+      <button class="navb" onclick="shiftMonth(-1)">‹</button>
+      <b>${((STATE.settings&&STATE.settings.lang)||"zh")==="en"?new Date(y,m-1,1).toLocaleDateString("en-US",{month:"long",year:"numeric"}):y+"年"+m+"月"}</b>
+      <button class="navb" onclick="shiftMonth(1)">›</button></div>
+    <div class="cal">${wk}${cells}</div>
+    <div class="callegend"><span><i class="md"></i>${t('legend_has')}</span><span><i class="td"></i>${t('legend_today')}</span></div>
+    <div id="dayPanel"></div>`;
+}
+async function pickDay(iso){
+  const r=await api().get_day(iso);
+  const evs=r.events||[];
+  const list=evs.map(e=>{
+    const cls=e.status==="done"?"is-done":e.status==="skip"?"is-miss":"";
+    const tagcls=e.timing.startsWith("before")?"before":e.type==="skin"?"skin":"after";
+    return `<div class="row ${cls}"><div class="t">${e.time}</div>
+      <div class="ic">${e.type==="skin"?skinSVG:pillSVG}</div>
+      <div class="mid"><div class="n">${esc(e.name)} · ${esc(e.dose)}</div>
+      <div class="d"><span class="tag ${tagcls}">${esc(tlabel(e.timing))}</span></div></div></div>`;
+  }).join("") || `<div class="hint">${t('cal_no_plan')}</div>`;
+  document.getElementById("dayPanel").innerHTML=`<div class="sectlab" style="margin-top:18px">${esc(dateLabel(iso))}</div>${list}`;
+}
+
+let PHOTO_MODE="presc";
+function renderPhoto(){
+  const seg=`<div class="vseg">
+      <button class="${PHOTO_MODE==='presc'?'on':''}" onclick="setPhotoMode('presc')">${t('presc_tab')}</button>
+      <button class="${PHOTO_MODE==='box'?'on':''}" onclick="setPhotoMode('box')">${t('box_tab')}</button></div>`;
+  if(PHOTO_MODE==="box"){
+    $("#screen").innerHTML=`
+      <div class="ah"><div><div class="date">${t('box_mode')}</div><div class="hi">${t('box_title')}</div></div></div>${seg}
+      <div class="drop" onclick="doParseBox()">
+        <div class="cam"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 9h16"/></svg></div>
+        <div class="big">${t('box_cta')}</div>
+        <div class="sm">${t('box_sub')}</div></div>
+      <div id="parseOut"></div>`;
+    return;
+  }
+  $("#screen").innerHTML=`
+    <div class="ah"><div><div class="date">${t('presc_mode')}</div><div class="hi">${t('presc_title')}</div></div></div>${seg}
+    <div class="drop" onclick="doParse()">
+      <div class="cam"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="3" y="6.5" width="18" height="13" rx="3"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6.5l1.2-2h5.6L16 6.5"/></svg></div>
+      <div class="big">${t('presc_cta')}</div>
+      <div class="sm">${t('presc_sub')}</div></div>
+    <div id="parseOut"></div>`;
+}
+function setPhotoMode(m){ PHOTO_MODE=m; render(); }
+
+async function doParse(){
+  const out=$("#parseOut");
+  out.innerHTML=`<div class="hint" style="background:#EAF3FF;border-color:#cfe2ff;color:#1366C9">${t('recognizing2')}</div>`;
+  const r=await api().pick_and_parse();
+  if(!r.ok){ out.innerHTML=`<div class="hint">${esc(r.msg||t('cancelled'))}</div>`; return; }
+  window.__parsed=r.meds;
+  const list=r.meds.map(m=>`<div class="midrow"><div><div class="n">${esc(m.name)}</div>
+    <div class="d">${esc(m.dose||"")}</div></div>
+    <div class="when">${m.timings.map(t=>tlabel(t)).join(" / ")}</div></div>`).join("");
+  out.innerHTML=`
+    <div class="sectlab" style="color:var(--green-deep)">${t('parsed_pre')} ${r.meds.length} ${t('parsed_kinds')}${r.offline?" · "+t('offline'):""} · ${t('parsed_post')}</div>
+    <div class="card" style="padding:6px 16px">${list}</div>
+    <div class="hint">${t('parse_hint')}</div>
+    <button class="primary green" onclick="confirmParsed()">${t('confirm_add')}</button>`;
+}
+async function confirmParsed(){ STATE=await api().confirm_parsed(window.__parsed||[]); TAB="today"; syncTabs(); render(); }
+
+const DISCLAIMER_ZH="以下为机器识别与系统建议，仅供参考。如与药盒说明不一致，请以国家标准、药品说明书或医嘱为准。";
+const DISCLAIMER_EN="The following is machine recognition and a system suggestion, for reference only. If it differs from the package, follow the package insert or your doctor.";
+function LANG(){return (STATE.settings&&STATE.settings.lang)||"zh";}
+function disclaimerText(){return LANG()==="en"?DISCLAIMER_EN:DISCLAIMER_ZH;}
+const BOXI18N={
+ zh:{recognizing:"正在识别药盒，请稍候…",found:"已找到",notfoundTitle:"未找到这个药",
+     notfound:"本地资料库里没有匹配到该药盒。请在「自定义」手动添加，或用下方按钮查询。",
+     recognized:"识别到的文字：",plan:"系统建议的提醒安排",planNote:"加入后可随时在「自定义」修改时间与用量",
+     oral:"口服",skin:"外用/涂药",
+     indications:"适应症",usage:"用法用量",contra:"禁忌",cautions:"注意事项",elderly:"老年人提示",
+     cnTag:"中文资料",enTag:"英文资料(openFDA)",enFallback:"本药暂无中文资料，以下为英文原文。",
+     gate:n=>`请先阅读上方说明（${n}）`,confirm:"确认，加入提醒",manualAdd:"去「自定义」手动添加"},
+ en:{recognizing:"Recognizing the box, please wait…",found:"Found",notfoundTitle:"Medicine not found",
+     notfound:"No match in the local database. Add it manually under Settings, or use the button below to look it up.",
+     recognized:"Text recognized: ",plan:"Suggested reminder schedule",planNote:"You can adjust the time and dose later under Settings",
+     oral:"Oral",skin:"Topical",
+     indications:"Indications",usage:"Dosage",contra:"Contraindications",cautions:"Warnings",elderly:"For older adults",
+     cnTag:"Chinese info",enTag:"English (openFDA)",enFallback:"No Chinese info for this medicine; the English label is shown below.",
+     gate:n=>`Please read the notice above (${n})`,confirm:"Confirm and add reminder",manualAdd:"Add manually under Settings"}
+};
+function BT(){return BOXI18N[LANG()];}
+async function doParseBox(){
+  const out=$("#parseOut");
+  out.innerHTML=`<div class="hint" style="background:#EAF3FF;border-color:#cfe2ff;color:#1366C9">${BT().recognizing}</div>`;
+  const r=await api().pick_and_parse_box();
+  if(!r.ok){ out.innerHTML=`<div class="hint">${esc(r.msg||t('cancelled'))}</div>`; return; }
+  renderBoxResult(r);
+}
+function verifyButtons(name,approval){
+  const n=encodeURIComponent(name||""), a=encodeURIComponent(approval||"");
+  if(LANG()==="en"){
+    return `<button class="bigverify tp" onclick="openVerify('drugscom','${n}','${a}')">
+       Look up this medicine on Drugs.com<small>Third-party reference site · not the official FDA site</small></button>`;
+  }
+  return `<button class="bigverify cn" onclick="openVerify('nmpa','${n}','${a}')">
+       国家药监局（官方）查这个药<small>点开后如未自动定位，名字已复制，粘贴搜索即可</small></button>
+     <button class="bigverify tp" onclick="openVerify('mozun','${n}','${a}')">
+       第三方（摩熵）查这个药<small>第三方资料，仅供参考</small></button>`;
+}
+function renderBoxResult(r){
+  const T=BT();
+  const out=$("#parseOut");
+  const name=(r.found?(r.drug.name_cn||r.drug.name_en):(r.raw_name||""));
+  const appr=r.approval_no||"";
+  let body;
+  if(r.found){
+    const d=r.drug, s=r.suggest;
+    const srcTag=d.source==="seed_cn"?`<span class="tag after">${T.cnTag}</span>`
+                :(d.source==="openfda_en"||d.source==="en_fallback")?`<span class="tag skin">${T.enTag}</span>`:"";
+    const fallbackNote=(d.source==="en_fallback")?`<div class="hint" style="margin:0 0 8px">${T.enFallback}</div>`:"";
+    const plan=`${s.type==="skin"?T.skin:T.oral} · ${s.timings.map(tlabel).join(" / ")}${s.dose?(" · "+esc(s.dose)):""}`;
+    const fld=(t,v)=>v?`<div class="gline"><b>${t}</b><span>${esc(v)}</span></div>`:"";
+    window.__boxMed={name:s.name,dose:s.dose||"",type:s.type,timings:s.timings,
+                     start_date:new Date().toISOString().slice(0,10),course_text:"长期",
+                     source:"otc_box",drug_key:appr||""};
+    body=`
+      <div class="sectlab" style="color:var(--green-deep)">${T.found}：${esc(name)} ${srcTag}</div>
+      ${fallbackNote}
+      <div class="card guide">
+        ${fld(T.indications,d.indications)}
+        ${fld(T.usage,d.usage)}
+        ${fld(T.contra,d.contraindication)}
+        ${fld(T.cautions,d.cautions)}
+        ${d.elderly_caution?`<div class="gline warn"><b>${T.elderly}</b><span>${esc(d.elderly_caution)}</span></div>`:""}
+      </div>
+      <div class="sectlab">${T.plan}</div>
+      <div class="card"><div class="planbig">${plan}</div>
+        <div class="sm" style="color:var(--muted);margin-top:6px">${T.planNote}</div></div>`;
+  }else{
+    window.__boxMed=null;
+    body=`<div class="sectlab" style="color:var(--red-deep)">${T.notfoundTitle}</div>
+      <div class="card"><div class="notfound">${T.notfound}</div>
+      ${r.names&&r.names.length?`<div class="sm" style="color:var(--muted);margin-top:8px">${T.recognized}${r.names.map(esc).join("、")}</div>`:""}</div>`;
+  }
+  out.innerHTML=`
+    ${body}
+    <div class="disclaimer">⚠ ${disclaimerText()}</div>
+    <div class="verifybox">${verifyButtons(name,appr)}</div>
+    ${r.found?`<button class="primary green" id="boxConfirm" disabled onclick="confirmBox()">${T.gate('<span id="cd">5</span>')}</button>`
+             :`<button class="primary" onclick="gotoCustom()">${T.manualAdd}</button>`}`;
+  if(r.found) startGate();
+}
+let _gateTimer=null;
+function startGate(){
+  let n=5; const btn=$("#boxConfirm");
+  clearInterval(_gateTimer);
+  _gateTimer=setInterval(()=>{
+    n--;
+    if(n<=0){ clearInterval(_gateTimer); btn.disabled=false; btn.textContent=t('gate_confirm2'); }
+    else { const cd=$("#cd"); if(cd) cd.textContent=n; }
+  },1000);
+}
+async function openVerify(which,name,approval){
+  const r=await api().open_verify_url(which,decodeURIComponent(name),decodeURIComponent(approval));
+  if(r&&!r.ok){ try{ await navigator.clipboard.writeText(decodeURIComponent(approval)||decodeURIComponent(name)); }catch(e){}
+    alert(t('copied_name')); }
+}
+async function confirmBox(){
+  if(!window.__boxMed) return;
+  STATE=await api().add_med(window.__boxMed);
+  TAB="today"; syncTabs(); render();
+}
+function gotoCustom(){ TAB="custom"; syncTabs(); render(); }
+
+function renderCustom(){
+  const s=STATE.settings, tm=s.times;
+  const trow=(key,label,sub)=>`<div class="setrow"><div class="l"><b>${label}</b>${sub?`<span style="color:var(--muted);font-size:12.5px;display:block">${sub}</span>`:""}</div>
+    <input type="time" value="${tm[key]}" onchange="setTime('${key}',this.value)"></div>`;
+  const courseText=m=>{ if(m.end_date) return t('course_until')+m.end_date; return m.start_date?t('course_long'):""; };
+  const meds=(STATE.meds||[]).map(m=>`<div class="midrow"><div><div class="n">${esc(m.name)}</div>
+    <div class="d">${esc(m.dose||"")} · ${m.timings.map(tlabel).join("/")}${courseText(m)?` · ${esc(courseText(m))}`:""}</div></div>
+    <button class="del" onclick="delMed('${m.id}')">${t('del')}</button></div>`).join("")
+    || `<div class="d" style="color:var(--muted);padding:8px 4px">${t('no_added')}</div>`;
+  const today=new Date().toISOString().slice(0,10);
+  $("#screen").innerHTML=`
+    <div class="ah"><div><div class="date">${t('custom_mode')}</div><div class="hi">${t('custom_title')}</div></div></div>
+
+    <div class="sectlab">语言 / Language</div>
+    <div class="card">
+      <div class="setrow"><div class="l"><b>${t('lang_label')}</b><span style="color:var(--muted);font-size:12.5px;display:block">默认中文 / Default: Chinese</span></div>
+        <div style="display:flex;gap:8px">
+          <div class="chip ${s.lang!=='en'?'on':''}" onclick="setLang('zh')">中文</div>
+          <div class="chip ${s.lang==='en'?'on':''}" onclick="setLang('en')">English</div>
+        </div></div>
+    </div>
+
+    <div class="sectlab">${t('sec_profile')}</div>
+    <div class="card">
+      <div class="field"><label>${t('lbl_username')}</label>
+        <input class="inp" id="p_name" value="${esc(s.user_name||"")}" placeholder="${t('ph_username')}"></div>
+      <div class="field"><label>${t('lbl_note')}</label>
+        <textarea class="inp" id="p_note" rows="2" placeholder="${t('ph_note')}">${esc(s.family_note||"")}</textarea></div>
+      <button class="primary" style="font-size:16px;padding:14px" onclick="saveProfile()">${t('save_profile')}</button>
+    </div>
+
+    <div class="sectlab">${t('sec_times')} <span>${t('times_hint')}</span></div>
+    <div class="card" style="padding:4px 16px">
+      ${trow("wake",t('t_wake'))}${trow("breakfast",t('t_breakfast'))}${trow("lunch",t('t_lunch'))}${trow("dinner",t('t_dinner'))}${trow("bedtime",t('t_bedtime'))}</div>
+    <div class="hint">${t('meal_delay_pre')} ${s.after_meal_delay} ${t('meal_delay_post')}</div>
+
+    <div class="sectlab">${t('sec_added')}</div>
+    <div class="card" style="padding:6px 16px">${meds}</div>
+
+    <div class="sectlab">${t('sec_addmed')}</div>
+    <div class="card">
+      <div class="field"><label>${t('lbl_name')}</label><input class="inp" id="m_name" placeholder="${t('ph_name')}"></div>
+      <div class="field"><label>${t('lbl_dose')}</label><input class="inp" id="m_dose" placeholder="${t('ph_dose')}"></div>
+      <div class="field"><label>${t('lbl_type')}</label><div class="chips" id="m_type">
+        <div class="chip on" data-v="pill">${t('type_pill')}</div><div class="chip" data-v="skin">${t('type_skin')}</div></div></div>
+      <div class="field"><label>${t('lbl_timing')}</label><div class="chips" id="m_timings">
+        <div class="chip" data-v="before_breakfast">${tlabel('before_breakfast')}</div><div class="chip on" data-v="after_breakfast">${tlabel('after_breakfast')}</div>
+        <div class="chip" data-v="after_lunch">${tlabel('after_lunch')}</div><div class="chip" data-v="after_dinner">${tlabel('after_dinner')}</div>
+        <div class="chip" data-v="bedtime">${tlabel('bedtime')}</div></div></div>
+      <div class="field"><label>${t('lbl_start')}</label><input class="inp" type="date" id="m_start" value="${today}"></div>
+      <div class="field"><label>${t('lbl_course')}</label><div class="chips" id="m_course">
+        <div class="chip on" data-v="长期">${t('c_long')}</div><div class="chip" data-v="3天">${t('c_3d')}</div>
+        <div class="chip" data-v="1周">${t('c_1w')}</div><div class="chip" data-v="两周">${t('c_2w')}</div>
+        <div class="chip" data-v="1个月">${t('c_1m')}</div></div></div>
+      <button class="primary" onclick="addMed()">${t('add_to_remind')}</button>
+    </div>
+
+    <div class="sectlab">${t('sec_remind')}</div>
+    <div class="card">
+      <div class="setrow"><div class="l"><b>${t('opt_sound')}</b><span style="color:var(--muted);font-size:12.5px;display:block">${t('sound_sub')}</span></div>
+        <div class="chip ${s.sound_on?'on':''}" onclick="toggleOpt('sound_on',this)">${s.sound_on?t('on_word'):t('off_word')}</div></div>
+      <div class="setrow"><div class="l"><b>${t('opt_voice')}</b><span style="color:var(--muted);font-size:12.5px;display:block">${t('voice_sub')}</span></div>
+        <div class="chip ${s.voice_on?'on':''}" onclick="toggleOpt('voice_on',this)">${s.voice_on?t('on_word'):t('off_word')}</div></div>
+      <button class="primary" onclick="testAlarm()">${t('test_alarm')}</button>
+    </div>
+
+    <div class="sectlab">${t('sec_run')}</div>
+    <div class="card">
+      <div class="setrow"><div class="l"><b>${t('opt_autostart')}</b><span style="color:var(--muted);font-size:12.5px;display:block">${t('autostart_sub')}</span></div>
+        <div class="chip ${s.autostart?'on':''}" onclick="toggleOpt('autostart',this)">${s.autostart?t('on_word'):t('off_word')}</div></div>
+    </div>
+
+    <div class="sectlab">${t('sec_db')} <span id="dbcnt"></span></div>
+    <div class="card">
+      <div class="hint" style="margin-top:0">${t('db_hint')}</div>
+      <div class="field"><label>${t('lbl_drugname')}</label><input class="inp" id="db_name" placeholder="${t('ph_drugname')}"></div>
+      <div class="field"><label>${t('lbl_desc')}</label><input class="inp" id="db_desc" placeholder="${t('ph_desc')}"></div>
+      <div class="field"><label>${t('lbl_usage')}</label><input class="inp" id="db_usage" placeholder="${t('ph_usage')}"></div>
+      <div class="field"><label>${t('lbl_cat')}</label><input class="inp" id="db_cat" placeholder="${t('ph_cat')}"></div>
+      <button class="primary" onclick="addDrugEntry()">${t('add_to_db')}</button>
+      <button class="primary" style="background:#fff;color:var(--blue-deep);border:2px solid var(--blue);margin-top:10px" onclick="importDrugs()">${t('import_json')}</button>
+      <div class="hint" style="font-size:12px">${t('json_hint')}</div>
+    </div>
+
+    <div class="sectlab">${t('sec_online')}</div>
+    <div class="card">
+      <div class="hint" style="margin-top:0">${t('online_hint')}</div>
+      <div class="setrow"><div class="l"><b>${t('opt_online')}</b></div>
+        <div class="chip ${s.use_online?'on':''}" onclick="toggleOpt('use_online',this)">${s.use_online?t('on_word'):t('off_word')}</div></div>
+      <div class="field"><label>Anthropic API Key</label>
+        <input class="inp" id="m_key" type="password" placeholder="sk-ant-…" value="${s.api_key?'********':''}">
+        <button class="primary" style="font-size:16px;padding:14px;margin-top:10px" onclick="saveKey()">${t('save_key')}</button></div>
+    </div>`;
+  bindChips("#m_type",true); bindChips("#m_timings",false); bindChips("#m_course",true);
+  refreshDbCount();
+}
+async function refreshDbCount(){
+  try{ const n=await api().drugdb_count(); const el=$("#dbcnt"); if(el) el.textContent=t('db_total_pre')+n+t('db_total_post'); }catch(e){}
+}
+async function addDrugEntry(){
+  const name=$("#db_name").value.trim(); if(!name){alert(t('alert_need_name'));return;}
+  const r=await api().add_drug_entry({name,desc:$("#db_desc").value.trim(),
+      usage:$("#db_usage").value.trim(),category:$("#db_cat").value.trim()||"自添加"});
+  alert(r.msg||t('alert_done'));
+  if(r.ok){ $("#db_name").value="";$("#db_desc").value="";$("#db_usage").value="";$("#db_cat").value=""; refreshDbCount(); }
+}
+async function importDrugs(){
+  const r=await api().import_drugs_json();
+  alert(r.msg||t('alert_done'));
+  refreshDbCount();
+}
+async function saveProfile(){
+  const name=$("#p_name").value.trim(), note=$("#p_note").value;
+  STATE=await api().update_settings({user_name:name,family_note:note});
+  alert(t('alert_saved'));
+}
+function bindChips(sel,single){
+  document.querySelectorAll(sel+" .chip").forEach(c=>c.onclick=()=>{
+    if(single) c.parentElement.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+    c.classList.toggle("on");
+  });
+}
+async function addMed(){
+  const name=$("#m_name").value.trim(); if(!name){alert(t('alert_need_name2'));return;}
+  const type=document.querySelector("#m_type .chip.on")?.dataset.v||"pill";
+  const timings=[...document.querySelectorAll("#m_timings .chip.on")].map(c=>c.dataset.v);
+  if(!timings.length){alert(t('alert_need_timing'));return;}
+  const start_date=$("#m_start").value||new Date().toISOString().slice(0,10);
+  const course_text=document.querySelector("#m_course .chip.on")?.dataset.v||"长期";
+  STATE=await api().add_med({name,dose:$("#m_dose").value.trim(),type,timings,note:"",
+                             start_date,course_text,source:"manual"});
+  render();
+}
+async function delMed(id){ STATE=await api().delete_med(id); render(); }
+async function setLang(v){ STATE=await api().update_settings({lang:v}); render(); }
+async function setTime(key,val){ STATE=await api().update_settings({times:{[key]:val}}); }
+async function saveKey(){ const v=$("#m_key").value.trim(); if(v&&!v.startsWith("****")){await api().update_settings({api_key:v});alert(t('alert_saved'));} }
+async function toggleOpt(key,el){ const on=!el.classList.contains("on"); el.classList.toggle("on",on); el.textContent=on?t('on_word'):t('off_word'); STATE=await api().update_settings({[key]:on}); }
+async function testAlarm(){ await api().test_alarm(); }
+
+function renderWeek(){
+  const w=STATE.week;
+  const head=`<tr><th></th>${w.columns.map(c=>`<th>${wcol(c)}</th>`).join("")}</tr>`;
+  const body=w.rows.map(r=>`<tr><td class="day">${wday(r.day)}</td>${r.cells.map(c=>{
+    const sym=c==="y"?"✓":c==="n"?"✕":"–"; return `<td><span class="cell ${c}">${sym}</span></td>`;}).join("")}</tr>`).join("");
+  $("#screen").innerHTML=`
+    <div class="ah"><div><div class="date">${t('week_this')}</div><div class="hi">${t('week_title')}</div></div></div>
+    <div class="kpi">
+      <div class="b main"><div class="num">${w.rate}<span style="font-size:18px">%</span></div><div class="lab">${t('kpi_rate')}</div></div>
+      <div class="b"><div class="num">${w.done}</div><div class="lab">${t('kpi_done')}</div></div>
+      <div class="b"><div class="num" style="color:var(--red)">${w.missed}</div><div class="lab">${t('kpi_missed')}</div></div></div>
+    <div class="card"><table class="grid">${head}${body}</table>
+      <div class="repnote"><span><i class="dot" style="background:var(--green)"></i>${t('legend_took')}</span>
+      <span><i class="dot" style="background:var(--red)"></i>${t('legend_nottook')}</span>
+      <span><i class="dot" style="background:#EDF1F6;border:1px solid #cdd6e2"></i>${t('legend_none')}</span></div></div>
+    <button class="primary" onclick="exportWeek()">${t('export_week')}</button>`;
+}
+async function exportWeek(){ const r=await api().export_week(); if(r&&r.ok) alert(t('exported_to')+"\n"+r.path); }
+
+function tlabel(code){const L=(STATE.settings&&STATE.settings.lang)||"zh";
+  const M={zh:{before_breakfast:"早饭前",after_breakfast:"早饭后",before_lunch:"午饭前",after_lunch:"午饭后",before_dinner:"晚饭前",after_dinner:"晚饭后",bedtime:"睡前",custom:"指定时间"},
+  en:{before_breakfast:"Before breakfast",after_breakfast:"After breakfast",before_lunch:"Before lunch",after_lunch:"After lunch",before_dinner:"Before dinner",after_dinner:"After dinner",bedtime:"Bedtime",custom:"Custom time"}};
+  return (M[L]&&M[L][code])||M.zh[code]||code;}
+
+async function mark(key,status){ STATE=await api().mark(key,status); render(); }
+
+function syncTabs(){ document.querySelectorAll(".tabbar button").forEach(b=>b.classList.toggle("on",b.dataset.tab===TAB)); }
+document.querySelectorAll(".tabbar button").forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;syncTabs();render();});
+
+function showAlarm(ev){
+  ALARM_KEY=ev.key;
+  $("#alarm").innerHTML=`
+    <div class="rt">${ev.time}</div>
+    <div class="rk">${ev.type==="skin"?t('alarm_skin'):t('alarm_pill')}<small>${ev.timing?esc(tlabel(ev.timing)):esc(ev.slot||"")}${ev.note?" · "+esc(ev.note):""}</small></div>
+    <div class="medbig">
+      <div class="cap2">${ev.type==="skin"
+        ?'<svg width="46" height="46" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#fff" stroke-width="2.6"/></svg>'
+        :'<svg width="46" height="46" viewBox="0 0 24 24"><rect x="2.5" y="9" width="19" height="6" rx="3" fill="#fff"/><rect x="12" y="9" width="9.5" height="6" rx="3" fill="#CFE6FF"/></svg>'}</div>
+      <div class="name">${esc(ev.name)}</div>
+      <div class="dose">${ev.type==="skin"?"":t('eat')}${esc(ev.dose||"")}</div>
+      ${ev.note?`<div class="note">${t('note_pre')}${esc(ev.note)}</div>`:""}
+    </div>
+    <div class="bigbtns">
+      <button class="bbtn green" onclick="alarmDone()"><span class="gly"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span>${ev.type==="skin"?t('done_skin'):t('done_pill')}<small>${t('tap_this')}</small></button>
+      <button class="bbtn red" onclick="alarmSkip()"><span class="gly"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>${ev.type==="skin"?t('skip_skin'):t('skip_pill')}<small>${t('remind_later')}</small></button>
+    </div>
+    <div class="later" onclick="alarmLater()">${t('later_line')}</div>`;
+  $("#alarm").classList.remove("hidden");
+}
+async function alarmDone(){ const k=ALARM_KEY; closeAlarm(); if(k&&k.indexOf("_test")===0){await api().stop_alarm();}else{await api().mark(k,"done");refresh();} }
+async function alarmSkip(){ const k=ALARM_KEY; closeAlarm(); if(k&&k.indexOf("_test")===0){await api().stop_alarm();}else{await api().mark(k,"skip");refresh();} }
+async function alarmLater(){ const k=ALARM_KEY; closeAlarm(); if(k&&k.indexOf("_test")===0){await api().stop_alarm();}else{await api().snooze(k,10);} }
+function closeAlarm(){ $("#alarm").classList.add("hidden"); ALARM_KEY=null; }
+
+window.showAlarmFromPython = showAlarm;
+window.addEventListener("pywebviewready", async()=>{ await refresh(); });
+setTimeout(() => window.dispatchEvent(new Event("pywebviewready")), 150);
+</script>
+</body>
+</html>

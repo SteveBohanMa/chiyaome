@@ -1,0 +1,43 @@
+# 构建产物 / Build artifacts
+build/
+dist/
+*.spec
+
+# Python 缓存 / Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# 药品数据库（不提交，靠 build_drugs_db_v32.py 重建；成品随 Release 附件分发）
+# Drug database – not committed; rebuilt via build_drugs_db_v32.py
+drugs.db
+drugs_en.db
+
+# 本地用户数据（正确位置是 ~/.chiyaome/，绝不进仓库）
+# Local user data – lives in ~/.chiyaome/, never committed
+.chiyaome/
+
+# 旧版本存档 / Old archives & backups
+*.zip
+*.bak
+
+# 环境变量与密钥 / Environment & secrets
+.env
+.env.*
+*.env
+
+# 操作系统 / OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude Code local settings
+.claude/

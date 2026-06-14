@@ -1,0 +1,86 @@
+name: Build & Release Windows EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: chiyaome_app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+          pip install proxy_tools bottle pythonnet pystray Pillow rapidfuzz requests
+
+      - name: Build drugs database
+        run: |
+          python fetch_openfda_full.py
+          python build_drugs_db_v32.py --en drugs_en.db --compress
+
+      - name: Build exe with PyInstaller
+        run: >-
+          python -m PyInstaller --noconfirm --onefile --windowed
+          --name MedicationReminder
+          --icon chiyaome.ico
+          --add-data "web;web"
+          --add-data "alarm.wav;."
+          --add-data "ocr_parse.py;."
+          --add-data "chiyaome.ico;."
+          --add-data "drugs.db;."
+          --collect-all rapidocr_onnxruntime
+          --collect-all onnxruntime
+          --collect-all pyttsx3
+          --collect-all webview
+          --collect-all pythonnet
+          --collect-all clr_loader
+          --collect-all proxy_tools
+          --collect-all bottle
+          --collect-all pystray
+          --collect-all PIL
+          --hidden-import pyttsx3.drivers.sapi5
+          --hidden-import comtypes
+          --hidden-import clr
+          --hidden-import pystray._win32
+          --hidden-import rapidfuzz
+          --hidden-import drugdb
+          --hidden-import ocr_parse
+          app.py
+
+      - name: Create Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            chiyaome_app/dist/MedicationReminder.exe
+            chiyaome_app/drugs.db
+          body: |
+            ## 吃药么 ${{ github.ref_name }}
+
+            ### 下载说明
+            - **MedicationReminder.exe** — Windows 桌面端（双击运行，无需安装 Python）
+            - **drugs.db** — 药品数据库（已内置于 exe；开发者手动重建时使用）
+
+            ### 系统要求
+            Windows 10 / 11（64 位）
+
+            首次运行 Windows 可能提示「未知发布者」→ 点「仍要运行」即可。
+
+            ---
+            ⚠️ 本工具仅做用药提醒，不构成医疗建议。用药请遵医嘱。
